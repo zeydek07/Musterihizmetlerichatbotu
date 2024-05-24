@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Chat App</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@10.7.2/lib/languages/python.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/a11y-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+</head>
+
+<body>
+  <div class="container mt-5">
+    <h1 style="color:black">Chat Bot</h1>
+    <div class="chat-box mt-3">
+      <!-- Chat messages will be added here dynamically -->
+    </div>
+    <div class="form-group mt-3">
+      <textarea class="form-control" rows="3" placeholder="Mesajınızı lütfen buraya giriniz." id="message-input"></textarea>
+    </div>
+    <button type="button" class="btn btn-primary" id="send-btn">Gönder</button>
+  </div>
+  <script>
+setInterval(highlightAll,1000);
+// Function to highlight code using highlight.js library
+function highlightAll() {
+  document.querySelectorAll("pre code").forEach(block => {
+    hljs.highlightBlock(block);
+  });
+}
+
+    const chatBox = document.querySelector(".chat-box");
+    const messageInput = document.querySelector("#message-input");
+    const sendBtn = document.querySelector("#send-btn");
+
+    function addMessage(message, isUserMessage) {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("mt-3", "p-3");
+
+      if (isUserMessage) {
+        messageDiv.classList.add("user-message");
+        messageDiv.innerHTML = `
+        <img src="{{ url_for('static', filename='images/user.png') }}" class="user-icon"><div>${message}</div>
+        `;
+      } else {
+        messageDiv.classList.add("bot-message");
+        messageDiv.innerHTML = `
+        <img src="{{ url_for('static', filename='images/gpt.png') }}" class="bot-icon"><div>${message}</div>
+        `;
+      }
+
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Bot tarafından gönderilecek hoş geldin mesajı
+    const welcomeMessage = "Merhaba, hoş geldiniz! GPT 3.5 Turbo ile fine-tune edilmiş müşteri hizmetlerine hoş geldiniz.";
+
+    // Hoş geldin mesajını ekle
+    addMessage(welcomeMessage, false);
+
+    function sendMessage() {
+      const message = messageInput.value.trim();
+
+      if (message !== "") {
+        addMessage(message, true);
+
+        fetch("/api", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        })
+          .then(response => response.json())
+          .then(data => {
+                      messageInput.value = "";
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("mt-3", "p-3");
+            messageDiv.classList.add("bot-message");
+           
+            const content = data.content;
+            
+            // Check if the content has code block
+            const hasCodeBlock = content.includes("```");
+            if (hasCodeBlock) {
+              // If the content has code block, wrap it in a <pre><code> element
+              const codeContent = content.replace(/```([\s\S]+?)```/g, '</div><pre><code>$1</code></pre><div>');
+
+             
+              messageDiv.innerHTML = `<img src="{{ url_for('static', filename='images/gpt.png') }}" class="bot-icon"><div>${codeContent}</div>`
+             
+            }
+            else{
+              messageDiv.innerHTML = `<img src="{{ url_for('static', filename='images/gpt.png') }}" class="bot-icon"><div>${content}</div>`
+            }
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+          })
+          .catch(error => console.error(error));
+      }
+    }
+
+    
+    sendBtn.addEventListener("click", sendMessage);
+    messageInput.addEventListener("keydown", event => {
+      if (event.keyCode === 13 && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+
+</html>
