@@ -1,0 +1,4 @@
+I developed a customer service chatbot using Python and Flask. The app.py file is the main application file where I coded the chatbot's logic. The templates/index.html defines the user interface, while static/style.css determines the page's style. The enguncel.jsonl file contains the language model data for the chatbot, and requirements.txt lists the Python libraries required for the project. The chatbot provides customer service via the web using this setup.
+
+
+Python ve Flask kullanılarak geliştirilen bir müşteri hizmetleri chatbotunu  app.py dosyası uygulamanın ana dosyası olup, chatbotun mantığı burada kodladım. templates/index.html kullanıcı arayüzünü, static/style.css ise sayfanın stilini belirledim. enguncel.jsonl dosyası, chatbotun dil modeli verilerini içeriyor , requirements.txt ise proje için gerekli Python kütüphanelerini listeledim. Chatbot, bu yapı ile web üzerinden müşteri hizmetleri sunuyor. 
